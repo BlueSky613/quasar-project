@@ -11,5 +11,6 @@
     "javascriptreact",
     "typescript",
     "vue"
-  ]
+  ],
+  "bitoAI.codeCompletion.enableAutoCompletion": false
 }

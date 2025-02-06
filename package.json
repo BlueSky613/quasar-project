@@ -17,7 +17,7 @@
   "dependencies": {
     "@quasar/extras": "^1.16.4",
     "pdf-lib": "^1.17.1",
-    "pdfjs-dist": "^4.10.38",
+    "pdfjs-dist": "^2.10.377",
     "quasar": "^2.16.0",
     "vue": "^3.4.18",
     "vue-router": "^4.0.0"
