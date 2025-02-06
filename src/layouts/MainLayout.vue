@@ -2,101 +2,146 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
+        <q-toolbar-title>
+          Quasar PDF Viewer
+        </q-toolbar-title>
+
+        <!-- Add the file input button -->
         <q-btn
           flat
           dense
           round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
+          icon="upload"
+          aria-label="Upload PDF"
+          @click="triggerFileInput"
+        />
+        <input
+          type="file"
+          ref="fileInput"
+          accept="application/pdf"
+          @change="handleFileUpload"
+          style="display: none;"
+        />
+        
+        <!-- Add input box -->
+        <q-input
+          filled
+          v-model="inputText"
+          label="Enter text"
+          class="q-ml-md"
+          maxlength="100"
+          style="background-color: #f0f0f0;"
         />
 
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
+        <!-- Add "Click here" button -->
+        <q-btn
+          flat
+          dense
+          label="Click here"
+          class="q-ml-md"
+          @click="handleClickHere"
+        />
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
-      <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
-        </q-item-label>
-
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
-    </q-drawer>
-
+    <!-- Display the uploaded PDF -->
     <q-page-container>
-      <router-view />
+      <q-page class="q-pa-none">
+        <div v-if="pdfUrl" class="pdf-container">
+          <canvas ref="pdfCanvas" class="pdf-canvas"></canvas>
+        </div>
+      </q-page>
     </q-page-container>
   </q-layout>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-import EssentialLink from 'components/EssentialLink.vue'
+<script>
+import * as pdfjsLib from 'pdfjs-dist';
+import 'pdfjs-dist/web/pdf_viewer.css';
 
-const linksList = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
+export default {
+  data() {
+    return {
+      pdfUrl: null,
+      inputText: ''
+    };
   },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
+  methods: {
+    triggerFileInput() {
+      this.$refs.fileInput.click();
+    },
+    handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (file && file.type === 'application/pdf') {
+        this.pdfUrl = URL.createObjectURL(file);
+        this.renderPDF();
+      } else {
+        alert('Please upload a valid PDF file.');
+      }
+    },
+    async renderPDF() {
+      try {
+        const loadingTask = pdfjsLib.getDocument(this.pdfUrl);
+        const pdf = await loadingTask.promise;
+        const page = await pdf.getPage(1);
+        const viewport = page.getViewport({ scale: 1.5 });
+        const canvas = this.$refs.pdfCanvas;
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport
+        };
+        await page.render(renderContext).promise;
+      } catch (error) {
+        console.error('Error rendering PDF:', error);
+      }
+    },
+    handleClickHere() {
+      if (this.inputText) {
+        this.highlightText(this.inputText);
+      }
+    },
+    async highlightText(text) {
+      try {
+        const loadingTask = pdfjsLib.getDocument(this.pdfUrl);
+        const pdf = await loadingTask.promise;
+        const page = await pdf.getPage(1);
+        const textContent = await page.getTextContent();
+        const canvas = this.$refs.pdfCanvas;
+        const context = canvas.getContext('2d');
+
+        textContent.items.forEach(item => {
+          if (item.str.includes(text)) {
+            const { transform, width, height } = item;
+            const [x, y] = transform.slice(4, 6);
+            context.fillStyle = 'yellow';
+            context.fillRect(x, canvas.height - y, width, height);
+          }
+        });
+      } catch (error) {
+        console.error('Error highlighting text:', error);
+      }
+    }
   }
-]
-
-const leftDrawerOpen = ref(false)
-
-function toggleLeftDrawer () {
-  leftDrawerOpen.value = !leftDrawerOpen.value
-}
+};
 </script>
+
+<style>
+.pdf-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.pdf-canvas {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+</style>
