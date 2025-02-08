@@ -151,7 +151,6 @@ export default {
           
           textContent.items.forEach((item) => {
             if (item.str.toLowerCase().includes(text.toLowerCase())) {
-              console.log('Found text:', item.str)
               const { transform, width, height } = item
               const x = transform[4]
               const y = transform[5]
