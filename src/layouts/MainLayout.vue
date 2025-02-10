@@ -154,18 +154,19 @@ export default {
               const { transform, width, height } = item
               const x = transform[4]
               const y = transform[5]
-
+              var xlength = 0
+              const index = item.str.toLowerCase().indexOf(text.toLowerCase());
+              if(index == 0) xlength = 0;
+              else xlength = item.str.substring(0, index).length;
               // Adjust the coordinates to match the canvas coordinate system
               const viewport = page.getViewport({ scale: 1.0 })
               const scale = canvas.width / viewport.width
               const adjustedX = x * scale
               const adjustedY = (viewport.height - y) * scale
-              const adjustedWidth = width * scale
+              const adjustedWidth = width * scale * (text.length) / item.str.length;
               const adjustedHeight = height * scale
-
               context.fillStyle = 'rgba(255, 255, 0, 0.5)' // Yellow with 50% opacity
-              context.fillRect(adjustedX, adjustedY - adjustedHeight, adjustedWidth, adjustedHeight)
-
+              context.fillRect(adjustedX + width * scale * xlength / item.str.length, adjustedY - adjustedHeight, adjustedWidth, adjustedHeight)
             }
           })
         }
