@@ -158,7 +158,6 @@ export default {
               const index = item.str.toLowerCase().indexOf(text.toLowerCase());
               if(index == 0) xlength = 0;
               else xlength = item.str.substring(0, index).length;
-              // Adjust the coordinates to match the canvas coordinate system
               const viewport = page.getViewport({ scale: 1.0 })
               const scale = canvas.width / viewport.width
               const adjustedX = x * scale
