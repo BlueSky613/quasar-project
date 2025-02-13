@@ -164,7 +164,7 @@ export default {
               const adjustedY = (viewport.height - y) * scale
               const adjustedWidth = width * scale * (text.length) / item.str.length;
               const adjustedHeight = height * scale
-              context.fillStyle = 'rgba(255, 255, 0, 0.5)' // Yellow with 50% opacity
+              context.fillStyle = 'rgba(255, 255, 0, 0.5)'
               context.fillRect(adjustedX + width * scale * xlength / item.str.length, adjustedY - adjustedHeight, adjustedWidth, adjustedHeight)
             }
           })
