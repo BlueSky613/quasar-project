@@ -158,7 +158,7 @@ export default {
               const index = item.str.toLowerCase().indexOf(text.toLowerCase());
               if(index == 0) xlength = 0;
               else xlength = item.str.substring(0, index).length;
-              const viewport = page.getViewport({ scale: 1.0 })
+              const viewport = page.getViewport({ scale: 2.0 })
               const scale = canvas.width / viewport.width
               const adjustedX = x * scale
               const adjustedY = (viewport.height - y) * scale
